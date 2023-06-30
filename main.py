@@ -2,6 +2,7 @@ import tkinter
 from tkinter import *
 from tkinter import filedialog
 import buildAutomata
+import pushdownAutomata
 from PIL import ImageTk, Image
 import os
 
@@ -20,7 +21,8 @@ class inputWord():
             buildAutomata.afnBuild(filePath)
         elif automataType.get() == "AFD":
             buildAutomata.afdBuild(filePath)
-
+        elif automataType.get() == "AP":
+            pushdownAutomata.read_automato_from_txt(filePath)
         top = Toplevel()
         top.geometry()
         self.frame = Frame(top)
@@ -32,9 +34,12 @@ class inputWord():
         wordInserted = Label(top, text="")
         acceptMessage = Label(top, text="")
         send = Button(top, text="Continuar", command=lambda: onClick(input, acceptMessage, wordInserted))
-        imgFile = ImageTk.PhotoImage(Image.open("automata.png"))
-        imgShow = Label(top, image=imgFile)
-        imgShow.image = imgFile
+        if automataType.get() == "AP":
+            imgMessage = Label(top, text="Visualização de autômato não disponível para AP", font=('Arial 12'))
+        else:
+            imgFile = ImageTk.PhotoImage(Image.open("automata.png"))
+            imgShow = Label(top, image=imgFile)
+            imgShow.image = imgFile
 
         #Funcao que testa o automato e mostra na tela de foi aceito ou nao
         def onClick(word, acceptMessage, wordInserted):
@@ -46,7 +51,8 @@ class inputWord():
                 accept = buildAutomata.afnRun(word.get())
             elif automataType.get() == "AFD":
                 accept = buildAutomata.afdRun(word.get())
-
+            elif automataType.get() == "AP":
+                accept = pushdownAutomata.apRun(word.get())
             if accept:
                 acceptMessage.configure(text="Aceito", fg="#228B22", font="Arial 10 bold")
             else:
@@ -56,7 +62,10 @@ class inputWord():
         wordTitle.pack()
         input.pack()
         send.pack()
-        imgShow.pack()
+        if automataType.get() == "AP":
+            imgMessage.pack()
+        else:
+            imgShow.pack()
         acceptMessage.pack()
         wordInserted.pack()
 
@@ -85,6 +94,7 @@ title = Label(mainFrame, text="Olá! Bem vindo!", font=('Arial 18')).pack()
 subtitle = Label(mainFrame, text="Insira um arquivo para começar", font=('Arial 14')).pack()
 afnButton = Radiobutton(mainFrame, text="AFN", variable=automataType, value="AFN", command=uploadButton).pack()
 afdButton = Radiobutton(mainFrame, text="AFD", variable=automataType, value="AFD", command=uploadButton).pack()
+apButton = Radiobutton(mainFrame, text="AP", variable=automataType, value="AP", command=uploadButton).pack()
 
 mainFrame.place(rely=0.4, relx=0.5, anchor=CENTER)
 gui.protocol("WM_DELETE_WINDOW", closeApp)
